@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+
+const [,, ...args] = process.argv;
+
+if (args.length === 0) {
+  console.log('Usage: reinvent <string>');
+  process.exit(1);
+}
+
+console.log('reinvent' + args.join(' '));

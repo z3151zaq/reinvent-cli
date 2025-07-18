@@ -1,0 +1,25 @@
+{
+  "name": "reinvent-cli",
+  "version": "1.0.0",
+  "description": "A commandline tool that allows you to reinvent every command on your computer.",
+  "main": "index.js",
+  "bin": {
+    "reinvent": "bin/reinvent"
+  },
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/z3151zaq/reinvent-cli.git"
+  },
+  "keywords": [
+    "commandline"
+  ],
+  "author": "Winnie Xiong",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/z3151zaq/reinvent-cli/issues"
+  },
+  "homepage": "https://github.com/z3151zaq/reinvent-cli#readme"
+}
