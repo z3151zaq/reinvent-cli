@@ -3,17 +3,19 @@
 const [,, ...args] = process.argv;
 const path = require('path');
 const { generateFromAI } = require(path.join(__dirname, '../src/core/ai.js'));
+const logger = require(path.join(__dirname, '../src/core/logger.js')).default;
 const readline = require('readline');
 
 async function main() {
   if (args.length === 0) {
-    console.log('Usage: reinvent <string>');
+    logger.system('Usage: reinvent <string>');
     process.exit(1);
   }
   while (true) {
     try {
       const { output } = await generateFromAI(args.join(' '));
-      console.log('AI generated commands:\n\n' + output + '\nExecute the commands? (y = execute, n = exit, r = regenerate): ');
+      logger.ai(output);
+      logger.system('Execute the commands? (y = execute, n = exit, r = regenerate): ');
       const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
@@ -27,24 +29,24 @@ async function main() {
         const commands = output.split('\n').filter(Boolean);
         for (const cmd of commands) {
           try {
-            console.log(`\n> ${cmd}`);
+            logger.info(`\n> ${cmd}`);
             require('child_process').execSync(cmd, { stdio: 'inherit', shell: true });
           } catch (err) {
-            console.error('Error executing command:', err.message || err);
+            logger.error('Error executing command: ' + (err.message || err));
           }
         }
         break;
       } else if (answer.trim().toLowerCase() === 'n') {
-        console.log('Exit.');
+        logger.system('Exit.');
         break;
       } else if (answer.trim().toLowerCase() === 'r') {
-        console.log('Regenerating command(s)...');
+        logger.system('Regenerating command(s)...');
         continue;
       } else {
-        console.log('Invalid input. Please enter y, n, or r.');
+        logger.warn('Invalid input. Please enter y, n, or r.');
       }
     } catch (err) {
-      console.error('Error:', err.message || err);
+      logger.error('Error: ' + (err.message || err));
       process.exit(1);
     }
   }
