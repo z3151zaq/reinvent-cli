@@ -1,0 +1,33 @@
+---
+alwaysApply: true
+---
+# File-Level Rules for CLI Project
+
+## 1. File Structure
+- Each file should have a single responsibility.
+- Group related functions and classes together.
+- Place imports at the top and exports at the bottom of the file.
+
+## 2. Naming
+- Use descriptive, consistent file names (e.g., kebab-case or camelCase).
+- File names should reflect their main purpose or exported entity.
+
+## 3. Imports/Exports
+- Use explicit imports and exports; avoid wildcard imports.
+- Export only what is necessary for other modules.
+
+## 4. Comments
+- Add a file-level comment at the top describing the file's purpose.
+- Use inline comments to explain complex logic or important decisions.
+- Use JSDoc for all exported functions and classes.
+
+## 5. Testing
+- Each file containing logic should have corresponding test coverage.
+- Test all exported functions and classes.
+- Place test files in a `__tests__` or similar directory structure.
+
+## 6. Best Practices
+- Keep files small and focused.
+- Refactor large files into smaller, logical units.
+- Avoid duplicate code across files.
+- Regularly review and clean up unused code.

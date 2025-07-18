@@ -1,0 +1,37 @@
+---
+alwaysApply: true
+---
+# Module-Level Rules for CLI Project
+
+## 1. Interface Design
+- Expose only necessary functions and classes from each module.
+- Use clear, consistent naming for exported symbols.
+- Document all public interfaces with JSDoc.
+
+## 2. Dependencies
+- Minimize external dependencies; prefer built-in modules when possible.
+- Explicitly declare all dependencies in package.json.
+- Avoid circular dependencies between modules.
+
+## 3. Extensibility
+- Design modules to be easily extensible and reusable.
+- Use dependency injection or configuration objects for flexibility.
+
+## 4. Comments
+- Add module-level comments describing the module's purpose and usage.
+- Document all exported functions and classes with JSDoc.
+
+## 5. Testing
+- Each module should have its own test file(s).
+- Cover all exported functions and classes with unit tests.
+- Test for both normal and edge cases.
+
+## 6. Best Practices
+- Keep modules focused and cohesive.
+- Avoid tight coupling between modules.
+- Regularly review module dependencies and refactor as needed.
+- Ensure modules are easy to extend and maintain.
+
+## 7. Documentation
+- Each module must have a README.md with usage examples and API description.
+- Document all configuration options and environment variables.

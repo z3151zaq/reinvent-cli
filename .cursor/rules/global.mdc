@@ -1,0 +1,43 @@
+---
+alwaysApply: true
+---
+# Global Coding Rules for CLI Project
+
+## 1. Code Style
+- Follow clean code principles: SOLID, DRY, KISS.
+- Use meaningful, descriptive names for all variables, functions, and classes.
+- Consistently use either single or double quotes in JavaScript/TypeScript files.
+- Indent code with 2 spaces (no tabs).
+- Limit line length to 100 characters.
+
+## 2. Architecture
+- Write modular, maintainable, and testable code.
+- Separate concerns: keep business logic, CLI interface, and utilities in distinct modules.
+- Avoid deeply nested logic and magic numbers.
+- Prefer async/await for asynchronous operations.
+
+## 3. Comments
+- Every file, class, and public function must have a clear, concise comment describing its purpose.
+- Use English for all comments.
+- Use structured documentation comments (JSDoc for JS/TS).
+- Add inline comments for complex or non-obvious logic.
+
+## 4. Documentation
+- Every module, file, and public function/class must have structured documentation comments (JSDoc for JS/TS).
+- All new modules/services must include a README.md with usage, setup, API, and license.
+- Write concise and meaningful comments in English.
+
+## 5. Testing
+- All core logic must be covered by unit tests.
+- Use descriptive test names and cover edge cases.
+- Tests must be easy to run with a single command (e.g., `npm test`).
+- Write tests for both expected and unexpected input.
+- Use mocks/stubs for external dependencies.
+
+## 6. Best Practices
+- Validate all input/output.
+- Handle exceptions gracefully using try/catch where needed.
+- Never expose sensitive information in error messages.
+- Avoid side effects and global state.
+- Prefer pure functions where possible.
+- Regularly review and refactor code for clarity and maintainability.

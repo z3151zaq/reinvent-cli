@@ -1,0 +1,33 @@
+---
+alwaysApply: true
+---
+# Function-Level Rules for CLI Project
+
+## 1. Naming
+- Use clear, descriptive names that indicate the function's purpose.
+- Use verbs for functions (e.g., `getUser`, `calculateTotal`).
+
+## 2. Parameters and Return Values
+- Validate all input parameters; provide default values where appropriate.
+- Always document parameter types and return values using JSDoc.
+- Avoid functions with too many parameters; use objects for complex inputs.
+
+## 3. Error Handling
+- Use try/catch for operations that may throw errors.
+- Return meaningful error messages; never expose sensitive data.
+
+## 4. Comments
+- Every public function must have a JSDoc comment with @param, @returns, and @example.
+- Add inline comments for non-obvious logic.
+- Use English for all comments.
+
+## 5. Testing
+- Write unit tests for all public functions.
+- Test for both valid and invalid input.
+- Use mocks/stubs for external dependencies.
+
+## 6. Best Practices
+- Keep functions pure and side-effect free when possible.
+- Limit function length; refactor long functions into smaller ones.
+- Avoid deeply nested logic.
+- Regularly review and refactor functions for clarity and maintainability.
