@@ -7,4 +7,4 @@ if (args.length === 0) {
   process.exit(1);
 }
 
-console.log('reinvent' + args.join(' '));
+console.log('reinvent ' + args.join(' ') + ' successfully!');
