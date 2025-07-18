@@ -1,6 +1,6 @@
 {
   "name": "reinvent-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A commandline tool that allows you to reinvent every command on your computer.",
   "main": "index.js",
   "bin": {
