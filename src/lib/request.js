@@ -1,34 +1,56 @@
-// 假的 HTTP 请求方法，返回固定字符串
-// DO NOT DELETE, TESTING ONLY !!!
-async function getAICommands(url, options) {
-  console.log('@@@getAICommands');
-  return new Promise(res => {
-    res(`echo "@@@@hello world"
-echo "!!!!hello world"`);
-  });
+async function getAICommands(uuid, question) {
+  // Generate a unique ID for the conversation
+  
+  const requestBody = {
+    input: `The Question is ${question}` || '',
+    uuid: uuid
+  };
+
+  const response = await fetchUrl(requestBody);
+  return response.response;
+  
 }
 
-// 真实的 HTTP 请求方法，使用 fetch
-async function httpRequest(url, options = {}) {
-  const fetch = global.fetch || (await import('node-fetch')).default;
-  const response = await fetch(url, options);
-  const text = await response.json();
-  return text;
+async function initializeConversationId(language) {
+  const requestBody = {
+    input: `There are only two formats for your answer. 
+     First is the command (The head of your answer must be "#command", and the content is the single or multiple commands),
+     second is the advice (The head of your answer must be "@advice", and the content is your advice or question to get clear demand).
+     You must reasonably choose one of formats to answer me .
+     You must answer me in ${language}.` || '',
+  };
+
+  const response = await fetchUrl(requestBody);
+  return response.uuid;
+
 }
 
-// Fetch API key from external service
-async function getApiKey() {
+async function fetchUrl(requestBody) {
+
+  const apiUrl = 'http://2025hackathon-steel.vercel.app/api/ask';
+
   try {
-    const response = await httpRequest('http://localhost:3000/api/ask');
-    return response.apiKey;
+    const fetch = global.fetch || (await import('node-fetch')).default;
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody)
+    });
+    
+    const res = await response.text();
+    const jsonResponse = JSON.parse(res);
+    return jsonResponse
   } catch (error) {
-    console.error('Failed to fetch API key:', error.message);
-    throw new Error('Unable to fetch API key from external service');
+    console.error('Error making API request:', error);
+    throw error;
   }
 }
 
+
 module.exports = {
+  fetchUrl,
   getAICommands,
-  httpRequest,
-  getApiKey
+  initializeConversationId,
 };
