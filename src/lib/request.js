@@ -1,14 +1,11 @@
 async function getAICommands(uuid, question) {
   // Generate a unique ID for the conversation
-  
   const requestBody = {
     input: `The Question is ${question}` || '',
     uuid: uuid
   };
-
   const response = await fetchUrl(requestBody);
   return response.response;
-  
 }
 
 async function initializeConversationId(language) {
@@ -48,9 +45,23 @@ async function fetchUrl(requestBody) {
   }
 }
 
+/**
+ * Check and fix command
+ * @param {string[]} cmd - Command argument array
+ * @returns {Promise<true|string>} - Return true if valid, otherwise return the corrected command string
+ */
+async function checkValidCmd(cmd) {
+  const question = `
+Please determine whether the following is a valid command line instruction: \"${cmd.join(' ')}\".
+If it is, just return true or false.`;
+  // Assume uuid is available (e.g. use initializeConversationId('en-US'))
+  const aiResponse = await getAICommands(null, question);
+  return aiResponse;
+}
 
 module.exports = {
   fetchUrl,
   getAICommands,
   initializeConversationId,
+  checkValidCmd
 };
