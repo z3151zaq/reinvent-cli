@@ -4,7 +4,7 @@ const path = require('path');
 const { Command } = require('commander');
 const { default: saveAsScript } = require('../src/commands/ask-script');
 
-const { handleAskCommand, startConversationMode } = require(path.join(__dirname, '../src/commands/ask.js'));
+const { handleAskCommand } = require(path.join(__dirname, '../src/commands/ask.js'));
 const { interactive } = require(path.join(__dirname, '../src/commands/interactive.js'));
 const { proxy } = require(path.join(__dirname, '../src/commands/proxy.js'));
 

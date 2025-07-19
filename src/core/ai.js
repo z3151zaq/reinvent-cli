@@ -2,7 +2,6 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getApiKey } from '../lib/request.js';
 import getSystemInfo from '../lib/getSystemInfo.js';
 import { getDirectoryFiles } from '../lib/getDirectory.js';
 
@@ -30,7 +29,6 @@ const clearConversationHistory = () => {
 };
 
 export const generateFromAI = async (input) => {
-  const GEMINI_API_KEY = await getApiKey();
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({
     model: process.env.AI_MODEL_TEXT || "gemini-1.5-flash"
