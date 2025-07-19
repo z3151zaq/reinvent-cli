@@ -2,6 +2,7 @@
 const path = require('path');
 
 const { Command } = require('commander');
+const { default: saveAsScript } = require('../src/commands/ask-script');
 
 const { handleAskCommand, startConversationMode } = require(path.join(__dirname, '../src/commands/ask.js'));
 const { interactive } = require(path.join(__dirname, '../src/commands/interactive.js'));
@@ -14,13 +15,18 @@ program
   .description('A commandline tool that allows you to reinvent every command on your computer.')
   .version('1.0.2');
 
+
 program
-  .command('ask <question...>')
-  .description('Ask a question and start conversation mode')
-  .action(async (questionArr) => {
-    const question = questionArr.join(' ');
-    await handleAskCommand(question);
-    await startConversationMode();
+  .command('ask <input>')
+  .description('Ask AI to do anything you want in your terminal')
+  .option('--script <scriptName>', 'Run with script mode')
+  .action((input, options) => {
+    if (options.script) {
+      // handleScriptAsk(input, options.script);
+      saveAsScript(options.script);
+    } else {
+      handleAskCommand(input);
+    }
   });
 
 program

@@ -1,6 +1,4 @@
-
 async function getAICommands(uuid, question) {
-  
   // Generate a unique ID for the conversation
   
   const requestBody = {
@@ -52,7 +50,6 @@ async function fetchUrl(requestBody) {
 
 
 module.exports = {
-//   httpRequest,
   fetchUrl,
   getAICommands,
   initializeConversationId,
