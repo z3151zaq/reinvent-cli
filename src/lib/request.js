@@ -1,4 +1,4 @@
-// 假的 HTTP 请求方法，返回固定字符串
+
 async function getAICommands(uuid, question) {
   
   // Generate a unique ID for the conversation
