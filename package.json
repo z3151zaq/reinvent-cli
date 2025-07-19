@@ -24,9 +24,16 @@
   "homepage": "https://github.com/z3151zaq/reinvent-cli#readme",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+<<<<<<< HEAD
     "chalk": "^4.1.2",
     "dotenv": "^16.4.7",
     "inquirer": "^8.2.6",
     "reinvent-cli": "^1.0.2"
+=======
+    "chalk": "^5.4.1",
+    "commander": "^14.0.0",
+    "dotenv": "^16.4.7",
+    "inquirer": "^12.7.0"
+>>>>>>> origin/main
   }
 }
