@@ -1,3 +1,13 @@
+// 假的 HTTP 请求方法，返回固定字符串
+// DO NOT DELETE, TESTING ONLY !!!
+async function getAICommands(url, options) {
+  console.log('@@@getAICommands');
+  return new Promise(res => {
+    res(`echo "@@@@hello world"
+echo "!!!!hello world"`);
+  });
+}
+
 // 真实的 HTTP 请求方法，使用 fetch
 async function httpRequest(url, options = {}) {
   const fetch = global.fetch || (await import('node-fetch')).default;
@@ -18,6 +28,7 @@ async function getApiKey() {
 }
 
 module.exports = {
+  getAICommands,
   httpRequest,
   getApiKey
 };
