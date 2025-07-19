@@ -1,8 +1,37 @@
-
+const os = require('os');
+const commonDirs = require('./excludedDirs.json');
 const fs = require('fs');
 const path = require('path');
 
-const commonDirs = require('./excludedDirs.json');
+
+/**
+ * Get system information
+ * @returns {Object} System information object
+ */
+function getSystemInfo() {
+  try {
+    const systemInfo = {
+      platform: os.platform(),
+      arch: os.arch(),
+      hostname: os.hostname(),
+      type: os.type(),
+      release: os.release(),
+      uptime: os.uptime(),
+      totalMemory: os.totalmem(),
+      freeMemory: os.freemem(),
+      cpus: os.cpus().length,
+      userInfo: os.userInfo(),
+      networkInterfaces: os.networkInterfaces()
+    };
+
+    return systemInfo;
+  } catch (error) {
+    console.error('Error getting system info:', error);
+    throw new Error('Failed to get system information');
+  }
+}
+
+
 /**
  * 获取当前路径下所有文件路径和文件名，过滤常见依赖包
  * @param {string} dir 当前目录，默认 process.cwd()
@@ -31,4 +60,5 @@ function getDirectoryFiles(dir = process.cwd(), excludeDirs) {
     return results;
 }
 
-module.exports = { getDirectoryFiles };
+
+module.exports = { getDirectoryFiles, getSystemInfo };
