@@ -51,15 +51,22 @@ const askForPlatform = async () => {
   }
 };
 
-async function saveAsScript(fileName) {
-  const commands = await getAICommands();
-  // TODO: 获取回命令并保存为一个脚本，接着问用户是否需要帮他执行这个脚本
+async function saveAsScript(fileName, question) {
+  const platform = await askForPlatform();
+
+  const restrictedPrompt = `
+Please answer only with the exact ${platform === "windows" ? "batch" : "shell"} commands to perform the following task.
+Do NOT include explanations, descriptions, or any extra text.
+Task: ${question}
+`.trim();
+
+  const commands = await getAICommands(null, restrictedPrompt);
+
   if (!commands || commands.length === 0) {
     console.error("No commands received from AI.");
     return;
   }
 
-  const platform = await askForPlatform();
   const commandLines = Array.isArray(commands)
     ? commands
     : commands.split("\n");
