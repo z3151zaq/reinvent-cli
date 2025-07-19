@@ -1,7 +1,43 @@
-const { generateFromAI } = require('../core/ai.js');
-const logger = require('../core/logger.js').default;
 const readline = require('readline');
 const { execSync } = require('child_process');
+const logger = require('../core/logger.js').default;
+const getSystemInfo = require('../lib/getSystemInfo.js').default;
+const { getDirectoryFiles } = require('../lib/getDirectory.js');
+
+// Conversation history storage - using simple array, one session per process
+let conversationHistory = [];
+
+function addToConversationHistory(role, content) {
+  conversationHistory.push({ role, content, timestamp: new Date() });
+}
+
+function buildPrompt(userInput) {
+  const systemInfo = getSystemInfo();
+  const directoryFiles = getDirectoryFiles();
+  const currentDir = process.cwd();
+
+  let prompt = `You are a command line assistant for Node.js developers.`;
+
+  prompt += `\n\nSystem Information:
+- Platform: ${systemInfo.platform}
+- Architecture: ${systemInfo.arch}
+- Hostname: ${systemInfo.hostname}
+- OS Type: ${systemInfo.type}
+- OS Release: ${systemInfo.release}
+- Current Directory: ${currentDir}
+- Available Files: ${directoryFiles.slice(0, 20).join(', ')}${directoryFiles.length > 20 ? '...' : ''}`;
+  if (conversationHistory.length > 0) {
+    prompt += `\n\nPrevious conversation context:\n`;
+    conversationHistory.forEach((msg) => {
+      prompt += `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}\n`;
+    });
+    prompt += `\nBased on the conversation history above, please continue to help the user.`;
+  }
+
+  prompt += `\n\nCurrent user requirement: ${JSON.stringify(userInput)}\nYour job is to convert this requirement into valid **Node.js related terminal commands**.\nOutput the commands in plain text only.\n**Do not output any explanation, description, or code blocks.**\nEach command must be on its own line.`;
+
+  return prompt;
+}
 
 /**
  * Execute commands list
@@ -16,159 +52,73 @@ function executeCommands(commands) {
       logger.error('Error executing command: ' + (err.message || err));
     }
   }
-  logger.system('Commands executed. Continuing conversation...');
+  logger.system('Commands executed.');
 }
 
 /**
- * Handle user choice (y/n/r)
- * @param {string} answer - User input
- * @param {string} output - AI generated output
- * @param {string} originalInput - Original user input
- * @returns {Promise<boolean>} - Whether to continue conversation
+ * Send user input to remote AI API and get commands
+ * @param {string} input
+ * @returns {Promise<string>} AI generated commands
  */
-async function handleUserChoice(answer, output, originalInput) {
-  const choice = answer.trim().toLowerCase();
-  
-  if (choice === 'y') {
-    const commands = output.split('\n').filter(Boolean);
-    executeCommands(commands);
-    return true;
-  } else if (choice === 'n') {
-    logger.system('Skipped. Continuing conversation...');
-    return true;
-  } else if (choice === 'r') {
-    logger.system('Regenerating command(s)...');
-    return false; // Need to regenerate
-  } else {
-    logger.warn('Invalid input. Please enter y, n, or r.');
-    return false; // Need to re-enter
-  }
-}
-
-/**
- * Handle regeneration case
- * @param {string} input - User input
- * @param {readline.Interface} rl - Readline interface
- * @returns {Promise<void>}
- */
-async function handleRegeneration(input, rl) {
+async function postToAI(input) {
   try {
-    const { output: newOutput } = await generateFromAI(input.trim());
-    logger.ai(newOutput);
-    logger.system('Execute the commands? (y = execute, n = skip, r = regenerate): ');
-    
-    const newAnswer = await new Promise(resolve => {
-      rl.question('', resolve);
+    const fetch = (await import('node-fetch')).default;
+    const prompt = buildPrompt(input);
+    addToConversationHistory('user', input);
+    const response = await fetch('http://2025hackathon-steel.vercel.app/api/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ input: prompt })
     });
-    
-    const choice = newAnswer.trim().toLowerCase();
-    
-    if (choice === 'y') {
-      const commands = newOutput.split('\n').filter(Boolean);
-      executeCommands(commands);
-    } else if (choice === 'n') {
-      logger.system('Skipped. Continuing conversation...');
-    } else {
-      logger.warn('Invalid input. Continuing conversation...');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+    const data = await response.json();
+    // 只输出 response 字段
+    addToConversationHistory('assistant', data.response || '');
+    return data.response || '';
   } catch (err) {
-    logger.error('Error during regeneration: ' + (err.message || err));
+    logger.error('Failed to get AI response: ' + err.message);
+    return '';
   }
 }
 
 /**
- * Handle single AI interaction
- * @param {string} input - User input
- * @param {readline.Interface} rl - Readline interface
- * @returns {Promise<void>}
- */
-async function handleAIInteraction(input, rl) {
-  try {
-    const { output } = await generateFromAI(input.trim());
-    logger.ai(output);
-    logger.system('Execute the commands? (y = execute, n = skip, r = regenerate): ');
-    
-    const answer = await new Promise(resolve => {
-      rl.question('', resolve);
-    });
-    
-    const shouldContinue = await handleUserChoice(answer, output, input);
-    
-    if (!shouldContinue) {
-      if (answer.trim().toLowerCase() === 'r') {
-        await handleRegeneration(input, rl);
-      }
-    }
-  } catch (err) {
-    logger.error('Error: ' + (err.message || err));
-  }
-}
-
-/**
- * Start continuous conversation mode
- * @returns {Promise<void>}
- */
-async function startConversationMode() {
-  logger.system('\nEnter your next command (or press Ctrl+C to exit):');
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-  
-  rl.on('line', async (input) => {
-    if (input.trim() === '') {
-      return;
-    }
-    
-    await handleAIInteraction(input, rl);
-    logger.system('\nEnter your next command (or press Ctrl+C to exit):');
-  });
-  
-  rl.on('close', () => {
-    logger.system('\nConversation ended.');
-    process.exit(0);
-  });
-}
-
-/**
- * Handle ask command with question
+ * Handle ask command with question (single AI call, y/n only)
  * @param {string} question - The question to ask AI
  * @returns {Promise<void>}
  */
 async function handleAskCommand(question) {
-  while (true) {
-    try {
-      const { output } = await generateFromAI(question);
-      logger.ai(output);
-      logger.system('Execute the commands? (y = execute, n = skip, r = regenerate): ');
-      
-      const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-      });
-      
-      const answer = await new Promise(resolve => {
-        rl.question('', resolve);
-      });
-      rl.close();
-      
-      const shouldContinue = await handleUserChoice(answer, output, question);
-      
-      if (shouldContinue) {
-        break;
-      }
-    } catch (err) {
-      logger.error('Error: ' + (err.message || err));
-      process.exit(1);
+  try {
+    const output = await postToAI(question);
+    logger.ai(output);
+    logger.system('Execute the commands? (y = execute, n = skip): ');
+
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+
+    const answer = await new Promise(resolve => {
+      rl.question('', resolve);
+    });
+    rl.close();
+
+    const choice = answer.trim().toLowerCase();
+    if (choice === 'y') {
+      const commands = output.split('\n').filter(Boolean);
+      executeCommands(commands);
+    } else if (choice === 'n') {
+      logger.system('Skipped.');
+    } else {
+      logger.warn('Invalid input. Exiting.');
     }
+  } catch (err) {
+    logger.error('Error: ' + (err.message || err));
+    process.exit(1);
   }
 }
 
 module.exports = {
-  executeCommands,
-  handleUserChoice,
-  handleRegeneration,
-  handleAIInteraction,
-  startConversationMode,
   handleAskCommand
 }; 
