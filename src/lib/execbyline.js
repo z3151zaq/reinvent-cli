@@ -1,5 +1,5 @@
 
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 const inquirer = require('inquirer');
 
 /**
@@ -21,13 +21,12 @@ async function execByLine(commandsStr) {
         ]);
         if (run) {
             await new Promise((resolve) => {
-                exec(cmd, (error, stdout, stderr) => {
-                    if (error) {
-                        console.log(`Error: ${error.message}`);
-                    } else {
-                        console.log(`Output:\n${stdout}`);
-                        if (stderr) console.log(`stderr:\n${stderr}`);
-                    }
+                // 拆分命令和参数
+                const parts = cmd.split(' ');
+                const mainCmd = parts[0];
+                const args = parts.slice(1);
+                const child = spawn(mainCmd, args, { stdio: 'inherit', shell: true });
+                child.on('close', () => {
                     resolve();
                 });
             });
