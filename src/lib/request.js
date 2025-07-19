@@ -59,9 +59,21 @@ If it is, just return true or false.`;
   return aiResponse;
 }
 
+async function getValidCmd(cmd) {
+  const question = `The user want to use ${cmd[0]} to do something, but the command is not valid.
+Please give me a valid command to do the same thing, and return the command as a string.
+The command is: ${cmd.join(' ')}
+Don't use markdown or any other formatting.
+Don't return any other text, just the command itself. If you can't find a valid command, return an empty string.
+  `;
+  const aiResponse = await getAICommands(null, question);
+  return aiResponse;
+}
+
 module.exports = {
   fetchUrl,
   getAICommands,
   initializeConversationId,
-  checkValidCmd
+  checkValidCmd,
+  getValidCmd
 };
