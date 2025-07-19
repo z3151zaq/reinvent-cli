@@ -15,7 +15,8 @@ const promptYesNo = (question) => {
   return new Promise((resolve) => {
     rl.question(`${question} (Y/n): `, (answer) => {
       rl.close();
-      resolve(answer.toLowerCase().startsWith("y"));
+      const normalized = answer.trim().toLowerCase();
+      resolve(normalized === "" || normalized.startsWith("y"));
     });
   });
 };
