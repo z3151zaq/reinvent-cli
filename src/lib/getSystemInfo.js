@@ -27,4 +27,4 @@ function getSystemInfo() {
   }
 }
 
-module.exports= { getSystemInfo }; 
+export default getSystemInfo;
