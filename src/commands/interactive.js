@@ -1,9 +1,7 @@
 const inquirer = require('inquirer');
 const prompt = inquirer.createPromptModule();
-const { exec } = require('child_process');
-const { promisify } = require('util');
+const { spawn } = require('child_process');
 const { getAICommands, initializeConversationId } = require('../lib/request.js');
-const execAsync = promisify(exec);
 
 async function interactive() {
     const chalk = (await import('chalk')).default;
@@ -15,7 +13,7 @@ async function interactive() {
 
 async function handleAskMode() {
     const chalk = (await import('chalk')).default;
-    console.log(chalk.blue('\n🤖 AI Assistant Mode\n'));
+    console.log(chalk.bgBlue.white.bold('\n🤖 AI Assistant Mode\n'));
     console.log(chalk.gray('Start a session with AI to get command recommendations.\n'));
     
     // Initialize conversation ID
@@ -40,7 +38,7 @@ async function handleAskMode() {
             }
         ]);
 
-        console.log(chalk.yellow(`\n🤔 Processing: "${question}"`));
+        console.log(chalk.bgYellow.black(`\n🤔 Processing: "${question}"`));
         
         try {
             // Get AI recommendations using getAICommands with language parameter
@@ -50,7 +48,7 @@ async function handleAskMode() {
             const commands = aiResponse.split('\n').filter(line => line.trim().length > 0);
             
             if (commands.length === 0) {
-                console.log(chalk.red('❌ No commands received from AI.'));
+                console.log(chalk.bgRed.white('❌ No commands received from AI.'));
                 continue;
             }
             
@@ -58,9 +56,9 @@ async function handleAskMode() {
 
             // Display the AI response
             if (isCommand) {
-                console.log(chalk.green('\n✅ AI Recommended Commands:'));
-                commands.forEach((cmd) => {
-                    console.log(chalk.white(` ${cmd}`));
+                console.log(chalk.bgGreen.black('\n✅ AI Recommended Commands:'));
+                commands.forEach((cmd, idx) => {
+                    console.log(chalk.whiteBright(`  ${chalk.bold(idx + 1)}. ${cmd}`));
                 });
                 
                 // Only ask for confirmation if the first command starts with '#command'
@@ -87,46 +85,50 @@ async function handleAskMode() {
                       console.log(chalk.blue('\n🚀 Executing commands...\n'));
                       for (const cmd of commands) {
                           try {
-                              console.log(chalk.yellow(`> ${cmd}`));
-                              const { stdout, stderr } = await execAsync(cmd);
-                              
-                              if (stdout) {
-                                  console.log(chalk.green('✅ Output:'));
-                                  console.log(chalk.white(stdout));
-                              }
-                              
-                              if (stderr) {
-                                  console.log(chalk.yellow('⚠️  Warnings:'));
-                                  console.log(chalk.white(stderr));
-                              }
+                              console.log(chalk.bgMagenta.whiteBright(`> ${cmd}`));
+                              // 拆分命令和参数
+                              const parts = cmd.split(' ');
+                              const mainCmd = parts[0];
+                              const args = parts.slice(1);
+                              await new Promise((resolve, reject) => {
+                                  const child = spawn(mainCmd, args, { stdio: 'inherit', shell: true });
+                                  child.on('close', (code) => {
+                                      if (code === 0) {
+                                          resolve();
+                                      } else {
+                                          reject(new Error(`Process exited with code ${code}`));
+                                      }
+                                  });
+                                  child.on('error', (err) => {
+                                      reject(err);
+                                  });
+                              });
                           } catch (error) {
-                              console.log(chalk.red(`❌ Error executing: ${cmd}`));
-                              console.log(chalk.white(error.message));
+                              console.log(chalk.bgRed.whiteBright(`❌ Error executing: ${cmd}`));
+                              console.log(chalk.redBright(error.message));
                           }
                       }
-                      console.log(chalk.green('\n✅ Commands executed successfully!\n'));
+                      console.log(chalk.bgGreen.white.bold('\n✅ Commands executed successfully!\n'));
                       break;
                       
                   case 'no':
-                      console.log(chalk.yellow('\n🔄 Asking AI for different advice...\n'));
+                      console.log(chalk.bgYellow.black('\n🔄 Asking AI for different advice...\n'));
                       continue;
               }
               
             } else {
-                console.log(chalk.green('\n✅ AI Advice:'));
-                commands.forEach((cmd) => {
-                    console.log(chalk.white(` ${cmd}`));
+                console.log(chalk.bgCyan.black('\n✅ AI Advice:'));
+                commands.forEach((cmd, idx) => {
+                    console.log(chalk.cyanBright(`${cmd}`));
                 });
-                
-                // For advice, just continue to next question
                 continue;
             }
             
             
             
         } catch (error) {
-            console.log(chalk.red('❌ Error getting AI recommendations:'));
-            console.log(chalk.white(error.message));
+            console.log(chalk.bgRed.white('❌ Error getting AI recommendations:'));
+            console.log(chalk.redBright(error.message));
             
             const { retry } = await prompt([
                 {
@@ -138,7 +140,7 @@ async function handleAskMode() {
             ]);
             
             if (!retry) {
-                console.log(chalk.gray('\n👋 Exiting AI session.\n'));
+                console.log(chalk.bgGray.white.bold('\n👋 Exiting AI session.\n'));
                 return;
             }
         }
