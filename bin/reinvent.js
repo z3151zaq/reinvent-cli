@@ -47,6 +47,7 @@ program
     await proxy();
   });
 
+console.log('@@@@process.argv:', process.argv);
 if (!process.argv.slice(2).length) {
   interactive();
 } else {
@@ -55,6 +56,6 @@ if (!process.argv.slice(2).length) {
   if (firstArg === "ask" || firstArg === "interactive") {
     program.parseAsync(process.argv);
   } else {
-    proxy();
+    proxy(process.argv);
   }
 }

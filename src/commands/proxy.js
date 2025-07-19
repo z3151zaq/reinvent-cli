@@ -6,8 +6,7 @@ const { exec } = require('child_process');
 const { get } = require('http');
 
 async function proxy(args) {
-    const originCmd = args[2];
-    const userCmd = args.slice(3).join(' ');
+    console.log('Received command:', args);
     const validResult = await checkValidCmd(args.slice(2));
     console.log('Origin Command:', args.slice(2));
     console.log('Valid Result:', validResult);
