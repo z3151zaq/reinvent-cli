@@ -30,7 +30,7 @@ async function main() {
     await startConversationMode();
   } else {
     proxy();
-    process.exit(1);
+    // process.exit(1);
   }
 }
 

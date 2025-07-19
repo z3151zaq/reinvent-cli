@@ -1,5 +1,5 @@
 function interactive() {
-    console.log('Starting interactive mode...');
+    console.log('@@@Starting interactive mode...');
 }
 
 module.exports = {
