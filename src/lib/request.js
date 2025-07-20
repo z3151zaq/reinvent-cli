@@ -1,7 +1,17 @@
+const { getDirectoryFiles, getSystemInfo } = require('./getContextInfo.js');
+
 async function getAICommands(uuid, question) {
-  // Generate a unique ID for the conversation
+  const systemInfo = getSystemInfo();
+  const directoryFiles = getDirectoryFiles();
+  const currentDir = process.cwd();
   const requestBody = {
-    input: `The Question is ${question}` || '',
+    input: `
+    Don't use markdown or any other formatting.
+    The user's os information is ${JSON.stringify(systemInfo)}
+    The user's current directory is ${currentDir}
+    The available files in the current directory are: ${directoryFiles.slice(0, 100).join(', ')}${directoryFiles.length > 100 ? '...' : ''}
+    The Question is ${question}
+    ` || '',
     uuid: uuid
   };
   const response = await fetchUrl(requestBody);
@@ -63,7 +73,6 @@ async function getValidCmd(cmd) {
   const question = `The user want to use ${cmd[0]} to do something, but the command is not valid.
 Please give me a valid command to do the same thing, and return the command as a string.
 The command is: ${cmd.join(' ')}
-Don't use markdown or any other formatting.
 Don't return any other text, just the command itself. If you can't find a valid command, return an empty string.
   `;
   const aiResponse = await getAICommands(null, question);

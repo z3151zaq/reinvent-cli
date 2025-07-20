@@ -1,8 +1,7 @@
 const readline = require('readline');
-const { execSync } = require('child_process');
 const logger = require('../core/logger.js').default;
-const getSystemInfo = require('../lib/getSystemInfo.js').default;
-const { getDirectoryFiles } = require('../lib/getDirectory.js');
+const { fetchUrl } = require('../lib/request.js');
+const { execByLine } = require('../lib/execbyline.js');
 
 // Conversation history storage - using simple array, one session per process
 let conversationHistory = [];
@@ -12,20 +11,21 @@ function addToConversationHistory(role, content) {
 }
 
 function buildPrompt(userInput) {
-  const systemInfo = getSystemInfo();
-  const directoryFiles = getDirectoryFiles();
-  const currentDir = process.cwd();
+  // const systemInfo = getSystemInfo();
+  // const directoryFiles = getDirectoryFiles();
+  // const currentDir = process.cwd();
 
   let prompt = `You are a command line assistant for Node.js developers.`;
-
-  prompt += `\n\nSystem Information:
-- Platform: ${systemInfo.platform}
-- Architecture: ${systemInfo.arch}
-- Hostname: ${systemInfo.hostname}
-- OS Type: ${systemInfo.type}
-- OS Release: ${systemInfo.release}
-- Current Directory: ${currentDir}
-- Available Files: ${directoryFiles.slice(0, 20).join(', ')}${directoryFiles.length > 20 ? '...' : ''}`;
+  
+//   prompt += `
+//   \n\nSystem Information:
+// - Platform: ${systemInfo.platform}
+// - Architecture: ${systemInfo.arch}
+// - Hostname: ${systemInfo.hostname}
+// - OS Type: ${systemInfo.type}
+// - OS Release: ${systemInfo.release}
+// - Current Directory: ${currentDir}
+// - Available Files: ${directoryFiles.slice(0, 20).join(', ')}${directoryFiles.length > 20 ? '...' : ''}`;
   if (conversationHistory.length > 0) {
     prompt += `\n\nPrevious conversation context:\n`;
     conversationHistory.forEach((msg) => {
@@ -40,22 +40,6 @@ function buildPrompt(userInput) {
 }
 
 /**
- * Execute commands list
- * @param {string[]} commands - Array of commands to execute
- */
-function executeCommands(commands) {
-  for (const cmd of commands) {
-    try {
-      logger.info(`\n> ${cmd}`);
-      execSync(cmd, { stdio: 'inherit', shell: true });
-    } catch (err) {
-      logger.error('Error executing command: ' + (err.message || err));
-    }
-  }
-  logger.system('Commands executed.');
-}
-
-/**
  * Send user input to remote AI API and get commands
  * @param {string} input
  * @returns {Promise<string>} AI generated commands
@@ -65,15 +49,16 @@ async function postToAI(input) {
     const fetch = (await import('node-fetch')).default;
     const prompt = buildPrompt(input);
     addToConversationHistory('user', input);
-    const response = await fetch('http://2025hackathon-steel.vercel.app/api/ask', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ input: prompt })
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
+    const data = await fetchUrl({ input: prompt, uuid: null });
+    // const response = await fetch('http://2025hackathon-steel.vercel.app/api/ask', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ input: prompt })
+    // });
+    // if (!response.ok) {
+    //   throw new Error(`HTTP error! status: ${response.status}`);
+    // }
+    // const data = await response.json();
     // 只输出 response 字段
     addToConversationHistory('assistant', data.response || '');
     return data.response || '';
@@ -106,8 +91,8 @@ async function handleAskCommand(question) {
 
     const choice = answer.trim().toLowerCase();
     if (choice === 'y') {
-      const commands = output.split('\n').filter(Boolean);
-      executeCommands(commands);
+      // 使用 execByLine 统一方法执行命令
+      await execByLine(output);
     } else if (choice === 'n') {
       logger.system('Skipped.');
     } else {
