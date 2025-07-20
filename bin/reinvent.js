@@ -10,6 +10,8 @@ const { handleAskCommand } = require(path.join(__dirname, '../src/commands/ask.j
 const { interactive } = require(path.join(__dirname, '../src/commands/interactive.js'));
 const { proxy } = require(path.join(__dirname, '../src/commands/proxy.js'));
 const { hijackCommand } = require(path.join(__dirname, '../src/lib/hijackCommand.js'));
+const { showHelp } = require(path.join(__dirname, '../src/commands/help.js'));
+
 
 // Welcome message styling
 const version = '1.0.5'; // Get from package.json
@@ -38,6 +40,13 @@ program
   .description('A commandline tool that allows you to reinvent every command on your computer.')
   .version('1.0.5');
 
+// Custom help command
+program
+  .command('help')
+  .description('Show detailed usage information')
+  .action(() => {
+    showHelp();
+  });
 
 program
   .command('ask <input>')
@@ -70,7 +79,7 @@ if (!process.argv.slice(2).length) {
 } else {
   // 只允许 ask 和 interactive 进入对应逻辑，其他都进入 proxy
   const firstArg = process.argv[2];
-  if (firstArg === 'ask' || firstArg === 'interactive') {
+  if (firstArg === 'ask' || firstArg === 'interactive' || firstArg === 'help') {
     program.parseAsync(process.argv);
   } else {
     // 判断参数个数，多个参数调用 proxy(arg)，否则调用 hijack()
