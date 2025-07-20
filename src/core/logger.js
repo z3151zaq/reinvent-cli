@@ -21,10 +21,10 @@ function colorizeAIOutput(msg) {
 
 const logger = {
   info: (msg) => {
-    console.log(chalk.blue('[INFO]'), chalk.blue(msg));
+    console.log(chalk.cyanBright('[INFO]'), chalk.cyanBright(msg));
   },
   warn: (msg) => {
-    console.log(chalk.yellowBright('[WARN]'), chalk.yellowBright(msg));
+    console.log(chalk.yellow('[WARN]'), chalk.yellow(msg));
   },
   error: (msg) => {
     console.log(chalk.redBright.bold('[ERROR]'), chalk.redBright.bold(msg));
