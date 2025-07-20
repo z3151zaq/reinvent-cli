@@ -21,8 +21,7 @@ program
   .option('--script <scriptName>', 'Run with script mode')
   .action((input, options) => {
     if (options.script) {
-      // handleScriptAsk(input, options.script);
-      saveAsScript(options.script);
+      saveAsScript(options.script, input);
     } else {
       handleAskCommand(input);
     }
@@ -42,7 +41,7 @@ program
     await proxy();
   });
 
-console.log('@@@@processing:', process.argv);
+console.log('processing:', process.argv);
 
 if (!process.argv.slice(2).length) {
   interactive();

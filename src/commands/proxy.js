@@ -82,7 +82,6 @@ async function proxy(args) {
       execCmd = await getValidCmd(args.slice(2));
       console.log("Executing:", execCmd);
       execByLine(execCmd);
-      console.log("Got valid command:", execCmd);
     }
   }
 }

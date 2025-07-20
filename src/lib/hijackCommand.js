@@ -1,7 +1,7 @@
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const { execSync, spawnSync } = require("child_process");
+const { spawnSync } = require("child_process");
 const { hijackWinCmd } = require("./hijackWinCmd");
 
 async function hijackCommand(cmd) {
