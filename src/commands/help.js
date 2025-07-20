@@ -16,8 +16,7 @@ Usage: reinvent [ ask | config | CMD ] [ options ]
        reinvent ask <natural language>
        reinvent CMD
        reinvent CMD <natural language>
-       reinvent config --language
-
+       
 Commands:
   ask <input>     Ask AI to do anything you want in your terminal
   interactive     Start interactive mode for continuous AI assistance
@@ -118,20 +117,6 @@ Examples:
   reinvent ls "show only files modified today"
   reinvent find "search for files containing 'config'"
   reinvent git "show recent commits"
-`,
-    config: `
-reinvent config [options]
-
-Configure Reinvent CLI settings.
-
-Options:
-  --language    Set the language for AI responses
-  --api-key     Set your API key for AI services
-  --endpoint    Set custom API endpoint
-
-Examples:
-  reinvent config --language
-  reinvent config --api-key YOUR_API_KEY
 `
   };
 
