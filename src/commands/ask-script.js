@@ -1,26 +1,10 @@
 import { getAICommands } from "../lib/request.js";
 import fs from "fs";
 import readline from "readline";
-import { exec } from "child_process";
-import util from "util";
+import { spawn } from "child_process";
 import os from "os";
 import path from "path";
 
-const execAsync = util.promisify(exec);
-
-const prompt = (question) => {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer.trim());
-    });
-  });
-};
 
 const promptYesNo = (question) => {
   const rl = readline.createInterface({
@@ -37,25 +21,10 @@ const promptYesNo = (question) => {
   });
 };
 
-// Ask user for platform
-const askForPlatform = async () => {
-  const validPlatforms = ["windows", "mac", "linux"];
-  while (true) {
-    const input = (
-      await prompt(
-        "Which platform do you want to generate the script for? (windows/mac/linux): "
-      )
-    ).toLowerCase();
-    if (validPlatforms.includes(input)) return input;
-    console.log("Invalid input. Please enter 'windows', 'mac', or 'linux'.");
-  }
-};
-
 async function saveAsScript(fileName, question) {
-  const platform = await askForPlatform();
-
+  const platform = os.platform();
   const restrictedPrompt = `
-Please answer only with the exact ${platform === "windows" ? "batch" : "shell"} commands to perform the following task.
+Please notice that only use the commands on user's current OS.
 Do NOT include explanations, descriptions, or any extra text.
 Task: ${question}
 `.trim();
@@ -70,7 +39,7 @@ Task: ${question}
   const commandLines = Array.isArray(commands)
     ? commands
     : commands.split("\n");
-  const isShell = platform === "mac" || platform === "linux";
+  const isShell = platform === "linux" || platform === "darwin";
   const ext = isShell ? "sh" : "bat";
   const scriptPath = `${fileName}.${ext}`;
 
@@ -86,31 +55,40 @@ Task: ${question}
   console.log("───────────────────────────────");
 
   // Only run if platform matches current OS
-  const currentPlatform = os.platform();
-  const isCompatible =
-    (platform === "windows" && currentPlatform === "win32") ||
-    (platform === "mac" && currentPlatform === "darwin") ||
-    (platform === "linux" && currentPlatform === "linux");
+  // const currentPlatform = os.platform();
+  // const isCompatible =
+  //   (platform === "windows" && currentPlatform === "win32") ||
+  //   (platform === "mac" && currentPlatform === "darwin") ||
+  //   (platform === "linux" && currentPlatform === "linux");
 
-  if (!isCompatible) {
-    console.log(
-      `This script was generated for "${platform}", but you're on "${currentPlatform}". Skipping execution.`
-    );
-    return;
-  }
+  // if (!isCompatible) {
+  //   console.log(
+  //     `This script was generated for "${platform}", but you're on "${currentPlatform}". Skipping execution.`
+  //   );
+  //   return;
+  // }
 
   const shouldRun = await promptYesNo(
     "Do you want to execute this script now?"
   );
   if (shouldRun) {
     try {
-      const command = isShell
-        ? `bash ${path.resolve(scriptPath)}`
-        : `cmd /c "${scriptPath}"`;
-
-      const { stdout, stderr } = await execAsync(command);
-      console.log(stdout);
-      if (stderr) console.error(stderr);
+      const runScript = isShell
+        ? ['bash', [path.resolve(scriptPath)]]
+        : ['cmd', ['/c', scriptPath]];
+      await new Promise((resolve, reject) => {
+        const child = spawn(runScript[0], runScript[1], { stdio: 'inherit', shell: true });
+        child.on('close', (code) => {
+          if (code === 0) {
+            resolve();
+          } else {
+            reject(new Error(`Process exited with code ${code}`));
+          }
+        });
+        child.on('error', (err) => {
+          reject(err);
+        });
+      });
     } catch (err) {
       console.error("Error executing script:", err);
     }
