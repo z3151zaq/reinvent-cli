@@ -12,6 +12,7 @@ const { proxy } = require(path.join(__dirname, '../src/commands/proxy.js'));
 const { hijackCommand } = require(path.join(__dirname, '../src/lib/hijackCommand.js'));
 const { showHelp } = require(path.join(__dirname, '../src/commands/help.js'));
 
+
 // Welcome message styling
 const version = '1.0.5'; // Get from package.json
 const buildTime = new Date().toLocaleString();
@@ -53,8 +54,7 @@ program
   .option('--script <scriptName>', 'Run with script mode')
   .action((input, options) => {
     if (options.script) {
-      // handleScriptAsk(input, options.script);
-      saveAsScript(options.script);
+      saveAsScript(options.script, input);
     } else {
       handleAskCommand(input);
     }
@@ -73,7 +73,6 @@ program
   .action(async () => {
     await proxy();
   });
-
 
 if (!process.argv.slice(2).length) {
   interactive();
