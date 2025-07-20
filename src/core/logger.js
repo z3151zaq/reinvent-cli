@@ -12,31 +12,44 @@ function colorizeAIOutput(msg) {
     });
     if (colored.includes('\u001b[31m')) {
       const parts = colored.split(/(\u001b\[31m.*?\u001b\[39m)/g);
-      return parts.map(part => part.startsWith('\u001b[31m') ? part : chalk.yellow(part)).join('');
+      return parts.map(part => part.startsWith('\u001b[31m') ? part : chalk.yellowBright(part)).join('');
     } else {
-      return chalk.yellow(colored);
+      return chalk.yellowBright(colored);
     }
   }).join('\n');
 }
 
 const logger = {
   info: (msg) => {
-    console.log(chalk.blue('[INFO]'), msg);
+    console.log(chalk.blue('[INFO]'), chalk.blue(msg));
   },
   warn: (msg) => {
-    console.log(chalk.yellow('[WARN]'), msg);
+    console.log(chalk.yellowBright('[WARN]'), chalk.yellowBright(msg));
   },
   error: (msg) => {
-    console.log(chalk.red('[ERROR]'), msg);
+    console.log(chalk.redBright.bold('[ERROR]'), chalk.redBright.bold(msg));
   },
   success: (msg) => {
-    console.log(chalk.green('[SUCCESS]'), msg);
+    console.log(chalk.green('[SUCCESS]'), chalk.green(msg));
   },
   ai: (msg) => {
     console.log(colorizeAIOutput(msg));
   },
   system: (msg) => {
     console.log(chalk.greenBright(msg));
+  },
+  // 返回格式化字符串的方法
+  formatInfo: (msg) => {
+    return `${chalk.blueBright.bold('[INFO]')} ${chalk.blueBright.bold(msg)}`;
+  },
+  formatWarn: (msg) => {
+    return `${chalk.yellowBright('[WARN]')} ${chalk.yellowBright(msg)}`;
+  },
+  formatError: (msg) => {
+    return `${chalk.red('[ERROR]')} ${chalk.red(msg)}`;
+  },
+  formatSuccess: (msg) => {
+    return `${chalk.greenBright.bold('[SUCCESS]')} ${chalk.greenBright.bold(msg)}`;
   }
 };
 

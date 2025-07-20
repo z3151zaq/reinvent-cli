@@ -1,7 +1,8 @@
 const readline = require('readline');
-const { execSync } = require('child_process');
 const logger = require('../core/logger.js').default;
 const { fetchUrl } = require('../lib/request.js');
+const { execByLine } = require('../lib/execbyline.js');
+
 // Conversation history storage - using simple array, one session per process
 let conversationHistory = [];
 
@@ -36,22 +37,6 @@ function buildPrompt(userInput) {
   prompt += `\n\nCurrent user requirement: ${JSON.stringify(userInput)}\nYour job is to convert this requirement into valid **Node.js related terminal commands**.\nOutput the commands in plain text only.\n**Do not output any explanation, description, or code blocks.**\nEach command must be on its own line.`;
 
   return prompt;
-}
-
-/**
- * Execute commands list
- * @param {string[]} commands - Array of commands to execute
- */
-function executeCommands(commands) {
-  for (const cmd of commands) {
-    try {
-      logger.info(`\n> ${cmd}`);
-      execSync(cmd, { stdio: 'inherit', shell: true });
-    } catch (err) {
-      logger.error('Error executing command: ' + (err.message || err));
-    }
-  }
-  logger.system('Commands executed.');
 }
 
 /**
@@ -106,8 +91,8 @@ async function handleAskCommand(question) {
 
     const choice = answer.trim().toLowerCase();
     if (choice === 'y') {
-      const commands = output.split('\n').filter(Boolean);
-      executeCommands(commands);
+      // 使用 execByLine 统一方法执行命令
+      await execByLine(output);
     } else if (choice === 'n') {
       logger.system('Skipped.');
     } else {
