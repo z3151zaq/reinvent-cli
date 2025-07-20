@@ -14,7 +14,8 @@ const { showHelp } = require(path.join(__dirname, '../src/commands/help.js'));
 
 
 // Welcome message styling
-const version = '1.0.5'; // Get from package.json
+const pkg = require(path.join(__dirname, '../package.json'));
+const version = pkg.version;
 const buildTime = new Date().toLocaleString();
 
 const welcomeMessage = gradientString('#0087FF', 'magenta').multiline(

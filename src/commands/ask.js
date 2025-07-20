@@ -1,6 +1,6 @@
 const readline = require('readline');
 const logger = require('../core/logger.js').default;
-const { fetchUrl } = require('../lib/request.js');
+const { getAICommands } = require('../lib/request.js');
 const { execByLine } = require('../lib/execbyline.js');
 
 // Conversation history storage - using simple array, one session per process
@@ -15,7 +15,7 @@ function buildPrompt(userInput) {
   // const directoryFiles = getDirectoryFiles();
   // const currentDir = process.cwd();
 
-  let prompt = `You are a command line assistant for Node.js developers.`;
+  // let prompt = `You are a command line assistant for Node.js developers.`;
   
 //   prompt += `
 //   \n\nSystem Information:
@@ -46,10 +46,15 @@ function buildPrompt(userInput) {
  */
 async function postToAI(input) {
   try {
-    const fetch = (await import('node-fetch')).default;
-    const prompt = buildPrompt(input);
-    addToConversationHistory('user', input);
-    const data = await fetchUrl({ input: prompt, uuid: null });
+    // const fetch = (await import('node-fetch')).default;
+    // const prompt = buildPrompt(input);
+    // addToConversationHistory('user', input);
+    const data = await getAICommands(null, `
+    Try to give me the commands to execute in terminal for the following requirement:
+    ${input}
+    `);
+    execByLine(data);
+    // console.log('AI response:', data);
     // const response = await fetch('http://2025hackathon-steel.vercel.app/api/ask', {
     //   method: 'POST',
     //   headers: { 'Content-Type': 'application/json' },
@@ -60,8 +65,8 @@ async function postToAI(input) {
     // }
     // const data = await response.json();
     // 只输出 response 字段
-    addToConversationHistory('assistant', data.response || '');
-    return data.response || '';
+    // addToConversationHistory('assistant', data.response || '');
+    return data || '';
   } catch (err) {
     logger.error('Failed to get AI response: ' + err.message);
     return '';
@@ -76,28 +81,31 @@ async function postToAI(input) {
 async function handleAskCommand(question) {
   try {
     const output = await postToAI(question);
-    logger.ai(output);
-    logger.system('Execute the commands? (y = execute, n = skip): ');
+    // console.log('AI output:', output);
+    // execByLine(output);
+    // logger.ai(output);
+    // logger.system('Execute the commands? (y = execute, n = skip): ');
+    
+    // const rl = readline.createInterface({
+    //   input: process.stdin,
+    //   output: process.stdout
+    // });
 
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    });
-
-    const answer = await new Promise(resolve => {
-      rl.question('', resolve);
-    });
-    rl.close();
-
-    const choice = answer.trim().toLowerCase();
-    if (choice === 'y') {
-      // 使用 execByLine 统一方法执行命令
-      await execByLine(output);
-    } else if (choice === 'n') {
-      logger.system('Skipped.');
-    } else {
-      logger.warn('Invalid input. Exiting.');
-    }
+    // const answer = await new Promise(resolve => {
+    //   rl.question('', resolve);
+    // });
+    // // rl.close();
+    // console.log('Executing commands...', output);
+    // const choice = answer.trim().toLowerCase();
+    // if (choice === 'y') {
+    //   console.log('Executing commands...', output);
+    //   // 使用 execByLine 统一方法执行命令
+    //   await execByLine(output);
+    // } else if (choice === 'n') {
+    //   logger.system('Skipped.');
+    // } else {
+    //   logger.warn('Invalid input. Exiting.');
+    // }
   } catch (err) {
     logger.error('Error: ' + (err.message || err));
     process.exit(1);
