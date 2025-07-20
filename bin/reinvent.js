@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 const path = require('path');
+const { default: boxen } = require('boxen');
+const gradientString = require('gradient-string');
 
 const { Command } = require('commander');
 const { default: saveAsScript } = require('../src/commands/ask-script');
@@ -8,12 +10,34 @@ const { handleAskCommand } = require(path.join(__dirname, '../src/commands/ask.j
 const { interactive } = require(path.join(__dirname, '../src/commands/interactive.js'));
 const { proxy } = require(path.join(__dirname, '../src/commands/proxy.js'));
 const { hijackCommand } = require(path.join(__dirname, '../src/lib/hijackCommand.js'));
+
+// Welcome message styling
+const version = '1.0.5'; // Get from package.json
+const buildTime = new Date().toLocaleString();
+
+const welcomeMessage = gradientString('#0087FF', 'magenta').multiline(
+  `Welcome to Reinvent CLI!\nVersion: ${version}\nBuild Time: ${buildTime}\n\n🌐 Website: https://2025hackathon-steel.vercel.app/`
+);
+
+const boxenOptions = {
+  borderColor: '#0087FF',
+  borderStyle: 'round',
+  margin: 2,
+  padding: 1,
+  title: `✨  Reinvent CLI  ✨ `,
+  titleAlignment: 'center',
+};
+
+// Display welcome message
+console.log(boxen(welcomeMessage, boxenOptions));
+
 const program = new Command();
 
 program
   .name('reinvent')
   .description('A commandline tool that allows you to reinvent every command on your computer.')
   .version('1.0.5');
+
 
 program
   .command('ask <input>')
@@ -40,8 +64,6 @@ program
   .action(async () => {
     await proxy();
   });
-
-console.log('processing:', process.argv);
 
 if (!process.argv.slice(2).length) {
   interactive();
