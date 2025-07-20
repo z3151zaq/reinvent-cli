@@ -109,11 +109,11 @@ function hijackWinCmd(cmd) {
     
     const finalPathString = finalPathArray.join(';');
     
-    // Try to modify user-level environment variable (doesn't require admin privileges)
+    // Try to modify system-level environment variable (requires admin privileges)
     try {
-        const userCommand = `powershell -Command "[Environment]::SetEnvironmentVariable('PATH', '${finalPathString}', 'User')"`;
-        execSync(userCommand, { stdio: 'inherit' });
-        console.log('✅ Successfully modified user-level environment variable');
+        const systemCommand = `powershell -Command "[Environment]::SetEnvironmentVariable('PATH', '${finalPathString}', 'Machine')"`;
+        execSync(systemCommand, { stdio: 'inherit' });
+        console.log('✅ Successfully modified system-level environment variable');
         
         console.log('\n=== Updated PATH Environment Variable (fakeCmd highest priority) ===');
         finalPathArray.forEach((p, index) => {
@@ -124,15 +124,15 @@ function hijackWinCmd(cmd) {
             }
         });
         
-        console.log('\n✅ fakeCmd path has been permanently added to the top of environment variable (highest priority)');
+        console.log('\n✅ fakeCmd path has been permanently added to the top of system environment variable (highest priority)');
         console.log('🔄 Please reopen command prompt or restart application for changes to take effect');
         
         // Also update current process environment variable
         process.env.PATH = finalPathString;
         
-    } catch (userError) {
-        console.error('❌ Cannot modify user-level environment variable');
-        console.log('💡 Please try running this program as administrator');
+    } catch (systemError) {
+        console.error('❌ Cannot modify system-level environment variable');
+        console.log('💡 Please run this program as administrator');
         return;
     }
 }
